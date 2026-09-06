@@ -147,34 +147,63 @@
     background: var(--ink-950);
   }
 
-  /* ===== CONTROLS ===== */
+  /* ===== CONTROLS (Glassmorphism & Max Transparency) ===== */
   #ctrls {
     position: fixed;
-    bottom: 20px; left: 50%; transform: translateX(-50%);
+    bottom: 24px; left: 50%; transform: translateX(-50%);
     z-index: 100;
     display: flex; align-items: center; gap: 14px;
-    background: rgba(11, 18, 32, 0.94);
-    color: #ECEEF3;
-    padding: 10px 16px;
+    background: rgba(11, 18, 32, 0.35);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+    color: #FFFFFF;
+    padding: 9px 18px;
     border-radius: 999px;
     font-family: var(--font-mono);
     font-size: 12px;
+    transition: all 0.25s ease;
+  }
+  #ctrls:hover {
+    background: rgba(11, 18, 32, 0.48);
+    border-color: rgba(255, 255, 255, 0.45);
+    box-shadow: 0 20px 48px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
   }
   #ctrls button {
-    background: transparent; border: 1px solid rgba(236,238,243,0.28);
-    color: inherit; padding: 6px 14px; border-radius: 999px;
-    font-family: inherit; font-size: 11px; cursor: pointer;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #FFFFFF; padding: 6px 14px; border-radius: 999px;
+    font-family: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer;
     letter-spacing: 0.06em;
+    transition: all 0.2s ease;
   }
-  #ctrls button:hover { border-color: rgba(236,238,243,0.7); }
-  #ctrls .time { font-variant-numeric: tabular-nums; min-width: 100px; text-align: center; }
+  #ctrls button:hover {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.02);
+  }
+  #ctrls .time {
+    font-variant-numeric: tabular-nums;
+    min-width: 105px;
+    text-align: center;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 0.05em;
+  }
   #ctrls .scrub {
-    width: 340px; height: 4px; background: rgba(236,238,243,0.18);
-    position: relative; border-radius: 2px; cursor: pointer;
+    width: 340px; height: 5px;
+    background: rgba(255, 255, 255, 0.28);
+    position: relative; border-radius: 3px; cursor: pointer;
+    transition: height 0.15s ease;
   }
+  #ctrls .scrub:hover { height: 7px; }
   #ctrls .scrub .knob {
     position: absolute; top: 0; bottom: 0; left: 0; width: 0%;
-    background: #ECEEF3; border-radius: 2px;
+    background: #FFFFFF; border-radius: 3px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   }
 
   /* ==========================================================
@@ -1080,8 +1109,8 @@
      ENDCARD
      ========================================================== */
   #endc {
-    background: var(--ink-950);
-    color: var(--fg-on-ink);
+    background: var(--gray-25);
+    color: var(--ink-950);
     padding: 120px 128px;
     display: flex; flex-direction: column; justify-content: center;
     position: absolute; inset: 0;
@@ -1090,14 +1119,14 @@
     content: '';
     position: absolute; inset: 0;
     background-image:
-      linear-gradient(to right, rgba(245,244,239,0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(245,244,239,0.03) 1px, transparent 1px);
+      linear-gradient(to right, rgba(11,18,32,0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(11,18,32,0.03) 1px, transparent 1px);
     background-size: 8px 8px;
     pointer-events: none;
   }
   #endc .wm {
     display: flex; align-items: center; gap: 24px;
-    margin-bottom: 44px;
+    margin-bottom: 36px;
     position: relative;
     opacity: 0;
     transform: translateY(8px);
@@ -1105,20 +1134,22 @@
                 transform 420ms cubic-bezier(0.2,0,0,1);
   }
   #endc.on .wm { opacity: 1; transform: translateY(0); }
-  #endc .wm svg { width: 72px; height: 72px; }
+  #endc .wm svg { width: 72px; height: 72px; color: #0B1220; }
   #endc .wm .nm {
     font-size: 96px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.035em;
     line-height: 1;
+    color: #0B1220;
   }
   #endc .tag {
-    font-size: 30px;
-    color: rgba(236,238,243,0.82);
-    letter-spacing: -0.01em;
-    line-height: 1.35;
+    font-size: 34px;
+    font-weight: 600;
+    color: #0B1220;
+    letter-spacing: -0.015em;
+    line-height: 1.45;
     margin-bottom: 64px;
-    max-width: 1100px;
+    max-width: 1200px;
     position: relative;
     opacity: 0;
     transform: translateY(8px);
@@ -1130,7 +1161,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 56px;
-    border-top: 1px solid rgba(236,238,243,0.16);
+    border-top: 1px solid rgba(11, 18, 32, 0.16);
     padding-top: 36px;
     max-width: 1500px;
     position: relative;
@@ -1142,28 +1173,32 @@
   #endc.on .meta { opacity: 1; transform: translateY(0); }
   #endc .meta .l {
     font-family: var(--font-mono);
-    font-size: 12px;
-    color: rgba(236,238,243,0.5);
+    font-size: 13px;
+    font-weight: 700;
+    color: #253352;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     margin-bottom: 14px;
   }
   #endc .meta .v {
     font-family: var(--font-mono);
-    font-size: 19px;
-    color: var(--fg-on-ink);
+    font-size: 20px;
+    font-weight: 600;
+    color: #0B1220;
     line-height: 1.55;
   }
   #endc .meta .v.big {
     font-family: var(--font-sans);
-    font-size: 24px;
-    font-weight: 500;
+    font-size: 26px;
+    font-weight: 700;
+    color: #0B1220;
   }
   #endc .meta .sm {
     display: block;
     font-family: var(--font-mono);
     font-size: 14px;
-    color: rgba(236,238,243,0.55);
+    font-weight: 600;
+    color: #253352;
     letter-spacing: 0.06em;
     margin-top: 4px;
   }

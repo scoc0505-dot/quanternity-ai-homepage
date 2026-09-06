@@ -101,10 +101,10 @@
   --bg-inverse:   var(--ink-950);
 
   /* ---- Semantic — Foreground ---- */
-  --fg-1:         var(--ink-950);   /* primary text */
-  --fg-2:         var(--gray-700);  /* body */
-  --fg-3:         var(--gray-500);  /* meta, captions */
-  --fg-4:         var(--gray-400);  /* placeholder, disabled */
+  --fg-1:         var(--ink-950);   /* primary text (#0B1220) */
+  --fg-2:         #1E293B;          /* body text (Dark Slate) */
+  --fg-3:         #334155;          /* meta, captions, subtitles (Dark Charcoal) */
+  --fg-4:         #475569;          /* secondary meta */
   --fg-on-ink:    #F5F4EF;          /* text on ink surfaces */
   --fg-accent:    var(--signal-700);
 
