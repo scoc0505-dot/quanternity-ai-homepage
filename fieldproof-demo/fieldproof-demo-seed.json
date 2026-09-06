@@ -1,0 +1,269 @@
+{
+  "_meta": {
+    "purpose": "FieldProof 공개 데모/영상 촬영용 시드 데이터",
+    "notice": "모든 인명·조직명은 가상입니다. 실존 인물·기관과 무관합니다.",
+    "demoBadge": {
+      "required": true,
+      "label": "DEMO DATA",
+      "placement": "상단 헤더 우측, 상시 노출",
+      "reason": "실제 고객사 데이터로 오인 방지"
+    },
+    "removedItems": [
+      "KAB-A 지정 — 인정기구 실명 표기 삭제 (허위표시 소지)",
+      "심사원·컨설턴트 직함 — 고객사 테넌트 내 표기 금지 (공평성 모순)"
+    ],
+    "lastUpdated": "2026-09-06"
+  },
+
+  "tenant": {
+    "type": "CLIENT",
+    "orgName": "Northgate AI Systems",
+    "orgNameKo": "노스게이트 AI 시스템즈",
+    "workspaceLabel": "§00 · AI GOVERNANCE WORKSPACE",
+    "accountableParty": "강민석 CISO / AI거버넌스 책임자",
+    "certScheme": "ISO/IEC 42001",
+    "certStatus": "유효",
+    "certExpiry": "2029-05-01",
+    "baselineDate": "2026-05-02",
+    "nextSurveillanceDate": "2026-11-14",
+    "daysToSurveillance": 85
+  },
+
+  "handoverBanner": {
+    "title": "HANDOVER COMPLETE · 인증서 발행 완료",
+    "subtitleRemoved": "(KAB-A 지정)",
+    "subtitleReplacement": "(인정 인증기관 발행)",
+    "body": "귀사의 AI 경영시스템(AIMS)이 ISO/IEC 42001 표준에 정식 적합 판정을 받았으며, 데이터 소유권이 이전되었습니다. 인증 baseline 대비 발생하는 모델/인프라 변경은 즉시 등록하고 12대 절차서의 운영 상태를 지속 유지하십시오.",
+    "actions": ["12대 절차서 관리", "Baseline 스냅샷"]
+  },
+
+  "people": [
+    { "id": "P01", "name": "서정한", "title": "대표이사", "role": "최종 승인권자", "replaces": "CEO 이민호" },
+    { "id": "P02", "name": "강민석", "title": "CISO", "role": "AI거버넌스 책임자", "replaces": "고지훈 CISO" },
+    { "id": "P03", "name": "유태경", "title": "기술이사", "role": "AI 시스템 총괄", "replaces": "이민호 기술이사" },
+    { "id": "P04", "name": "한지완", "title": "리스크관리팀장", "role": "리스크·SoA 담당", "replaces": "정우철 심사원", "note": "직함에서 '심사원' 제거 — 고객사 내부 직책으로 변경" },
+    { "id": "P05", "name": "문세영", "title": "AI품질담당", "role": "AI 영향평가(AIA) 담당", "replaces": "박은지 컨설턴트", "note": "직함에서 '컨설턴트' 제거 — 고객사 내부 직책으로 변경" },
+    { "id": "P06", "name": "오하린", "title": "인사·운영담당", "role": "역량·인식 관리", "replaces": "김태희 인사·운영담당" },
+    { "id": "P07", "name": "배승우", "title": "정보보호팀장", "role": "보안 통제 운영", "replaces": "(신규)" },
+    { "id": "P08", "name": "노가영", "title": "구매·외주관리담당", "role": "공급자 관리", "replaces": "(신규)" },
+    { "id": "P09", "name": "임도현", "title": "내부심사 담당", "role": "내부심사 프로그램 운영", "replaces": "(신규)", "note": "내부심사원은 조직 내부 인원이므로 표기 가능. 외부 심사원과 구분됨" }
+  ],
+
+  "aiSystems": [
+    {
+      "id": "SYS-01",
+      "name": "CardioVision AI",
+      "nameKo": "심장초음파 이상 탐지",
+      "description": "심혈관 질환 조기 진단 보조 (의료기기 2등급)",
+      "riskLevel": "고영향",
+      "currentState": "v2.1 배포 (A.9.5.1 재심사 검토)",
+      "status": "적합"
+    },
+    {
+      "id": "SYS-02",
+      "name": "ChAI Health",
+      "nameKo": "모바일 건강검진 리포트 어시스턴트",
+      "description": "검진 수치 쉬운 설명 및 식이 권고 챗봇",
+      "riskLevel": "중간 위험",
+      "currentState": "정상 가동 (변경 없음)",
+      "status": "적합"
+    },
+    {
+      "id": "SYS-03",
+      "name": "MediLLM Assistant",
+      "nameKo": "내부 의무기록 요약 PoC",
+      "description": "EHR 텍스트 자동 구조화 및 코딩 보조",
+      "riskLevel": "고영향",
+      "currentState": "신규 운영 개시 (인증 범위 확대 심사 필요)",
+      "status": "관찰"
+    }
+  ],
+
+  "complianceTicker": [
+    {
+      "severity": "high",
+      "title": "AI 위험평가 임계점수 변경 감지",
+      "detail": "A.9.5.1 변경관리 조항에 따라 인증기관 사전 보고 필요",
+      "date": "2026-08-19",
+      "ref": "Diff #02"
+    },
+    {
+      "severity": "medium",
+      "title": "보안 로깅 정책 v2.0 제정",
+      "detail": "A.8.29 보안 로깅 증적 연동 대기 중",
+      "date": "2026-07-30",
+      "ref": "Diff #01"
+    },
+    {
+      "severity": "low",
+      "title": "핸드오버 데이터베이스 정합성 확인",
+      "detail": "1,284건의 증적 아티팩트 무결성 검증 완료",
+      "date": "2026-08-14",
+      "ref": "Handover"
+    }
+  ],
+
+  "sopDocuments": [
+    {
+      "docId": "SOP-01",
+      "clauses": ["4.1", "4.2", "4.3", "4.4"],
+      "title": "조직 상황·이해관계자·적용범위 관리 절차서",
+      "owner": "강민석 CISO / AI거버넌스 책임자",
+      "approver": "서정한 대표이사",
+      "revision": "Rev. 1.2",
+      "lastUpdated": "2026-08-14",
+      "method": "직접 입력 + 파일",
+      "state": "운영중 · Active",
+      "_source": "화면 확인"
+    },
+    {
+      "docId": "SOP-02",
+      "clauses": ["5.1", "5.2", "5.3", "A.5"],
+      "title": "AI 방침·거버넌스·역할 및 우려사항 관리 절차서",
+      "owner": "강민석 CISO / AI거버넌스 책임자",
+      "approver": "서정한 대표이사",
+      "revision": "Rev. 1.1",
+      "lastUpdated": "2026-08-12",
+      "method": "직접 입력 + 파일",
+      "state": "운영중 · Active",
+      "_source": "화면 확인"
+    },
+    {
+      "docId": "SOP-03",
+      "clauses": ["6.1.1", "6.1.2", "6.1.3", "A.6"],
+      "title": "AI 리스크·기회·SoA 관리 절차서",
+      "owner": "한지완 리스크관리팀장",
+      "approver": "강민석 CISO",
+      "revision": "Rev. 2.0",
+      "lastUpdated": "2026-08-05",
+      "method": "직접 입력 + 파일",
+      "state": "운영중 · Active",
+      "_source": "화면 확인 · 직함 교체됨"
+    },
+    {
+      "docId": "SOP-04",
+      "clauses": ["6.1.2", "A.8.4", "AIA"],
+      "title": "AI 시스템 영향평가 절차서",
+      "owner": "문세영 AI품질담당",
+      "approver": "유태경 기술이사",
+      "revision": "Rev. 1.4",
+      "lastUpdated": "2026-08-10",
+      "method": "직접 입력 + 파일",
+      "state": "운영중 · Active",
+      "_source": "화면 확인 · 직함 교체됨"
+    },
+    {
+      "docId": "SOP-05",
+      "clauses": ["6.2", "7.1", "8.1", "A.9.5"],
+      "title": "AI 목표·자원·변경관리 절차서",
+      "owner": "유태경 기술이사",
+      "approver": "서정한 대표이사",
+      "revision": "Rev. 1.0",
+      "lastUpdated": "2026-08-01",
+      "method": "직접 입력 + 파일",
+      "state": "운영중 · Active",
+      "_source": "화면 확인"
+    },
+    {
+      "docId": "SOP-06",
+      "clauses": ["7.2", "7.3", "7.4", "7.5"],
+      "title": "역량·의사소통·문서관리 절차서",
+      "owner": "오하린 인사·운영담당",
+      "approver": "강민석 CISO",
+      "revision": "Rev. 1.0",
+      "lastUpdated": "2026-07-20",
+      "method": "직접 입력 + 파일",
+      "state": "운영중 · Active",
+      "_source": "화면 확인"
+    },
+    {
+      "docId": "SOP-07",
+      "clauses": ["8.2", "A.6.2"],
+      "title": "AI 시스템 수명주기 관리 절차서",
+      "owner": "유태경 기술이사",
+      "approver": "강민석 CISO",
+      "revision": "Rev. 1.1",
+      "lastUpdated": "2026-07-15",
+      "method": "직접 입력 + 파일",
+      "state": "운영중 · Active",
+      "_source": "추정 · 조항 구조 기반"
+    },
+    {
+      "docId": "SOP-08",
+      "clauses": ["A.7", "A.7.2", "A.7.4"],
+      "title": "AI 학습데이터 품질·출처 관리 절차서",
+      "owner": "문세영 AI품질담당",
+      "approver": "유태경 기술이사",
+      "revision": "Rev. 1.0",
+      "lastUpdated": "2026-07-08",
+      "method": "직접 입력 + 파일",
+      "state": "운영중 · Active",
+      "_source": "추정 · 조항 구조 기반"
+    },
+    {
+      "docId": "SOP-09",
+      "clauses": ["A.10", "A.10.2", "A.10.3"],
+      "title": "제3자·공급자 AI 관리 절차서",
+      "owner": "노가영 구매·외주관리담당",
+      "approver": "강민석 CISO",
+      "revision": "—",
+      "lastUpdated": null,
+      "method": "미등록",
+      "state": "미운영 · Pending",
+      "_source": "추정 · 미운영 4건 중 1"
+    },
+    {
+      "docId": "SOP-10",
+      "clauses": ["9.1", "9.2"],
+      "title": "성과 모니터링·내부심사 절차서",
+      "owner": "임도현 내부심사 담당",
+      "approver": "강민석 CISO",
+      "revision": "—",
+      "lastUpdated": null,
+      "method": "미등록",
+      "state": "미운영 · Pending",
+      "_source": "추정 · 미운영 4건 중 2"
+    },
+    {
+      "docId": "SOP-11",
+      "clauses": ["9.3"],
+      "title": "경영검토 절차서",
+      "owner": "강민석 CISO",
+      "approver": "서정한 대표이사",
+      "revision": "—",
+      "lastUpdated": null,
+      "method": "미등록",
+      "state": "미운영 · Pending",
+      "_source": "추정 · 미운영 4건 중 3"
+    },
+    {
+      "docId": "SOP-12",
+      "clauses": ["10.1", "10.2", "A.10.4"],
+      "title": "부적합·시정조치 및 지속적 개선 절차서",
+      "owner": "배승우 정보보호팀장",
+      "approver": "강민석 CISO",
+      "revision": "—",
+      "lastUpdated": null,
+      "method": "미등록",
+      "state": "미운영 · Pending",
+      "_source": "추정 · 미운영 4건 중 4"
+    }
+  ],
+
+  "sopSummary": {
+    "total": 12,
+    "active": 8,
+    "inactive": 4,
+    "operationRate": 66.7,
+    "displayNote": "미운영 4건에는 담당자와 다음 액션이 반드시 함께 표시되어야 함 — 숫자만 보이면 '미완'으로 읽힘"
+  },
+
+  "reviewChecklist": [
+    { "item": "KAB-A 등 인정기구 실명 전면 삭제", "owner": "개발", "status": "필수" },
+    { "item": "심사원·컨설턴트 직함 CLIENT 테넌트 내 미노출", "owner": "개발", "status": "필수" },
+    { "item": "DEMO DATA 배지 상시 노출", "owner": "개발", "status": "필수" },
+    { "item": "ISO 조항 번호·축약 명칭까지만 노출 (표준 본문 문구 금지)", "owner": "법무 검토", "status": "확인 필요" },
+    { "item": "ISO 로고·인정마크 미사용 (텍스트 배지만)", "owner": "법무 검토", "status": "확인 필요" },
+    { "item": "'인증 취득 보장'으로 읽히는 문구 부재 확인", "owner": "법무 검토", "status": "확인 필요" }
+  ]
+}

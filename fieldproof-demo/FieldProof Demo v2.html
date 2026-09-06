@@ -1,0 +1,1808 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1920, height=1080"/>
+<title>FieldProof — 30초 데모</title>
+<link rel="stylesheet" href="assets/colors_and_type.css"/>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    background: var(--gray-25);
+    overflow: hidden;
+    font-family: var(--font-sans);
+    color: var(--ink-950);
+  }
+
+  /* ===== STAGE — 1920×1080 letterboxed ===== */
+  #wrap {
+    position: fixed; inset: 0;
+    background: var(--gray-25);
+    overflow: hidden;
+  }
+  #stage {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 1920px; height: 1080px;
+    transform-origin: center center;
+    background: var(--gray-25);
+    overflow: hidden;
+  }
+
+  /* ===== PERSISTENT HUD ===== */
+  .hud {
+    position: absolute;
+    top: 40px; left: 64px; right: 64px;
+    display: none !important;
+    align-items: center; gap: 24px;
+    z-index: 30;
+  }
+  .hud.on { display: flex !important; }
+  .hud .brand {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .hud .brand svg { width: 32px; height: 32px; color: var(--ink-950); }
+  .hud .brand .name {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.01em;
+    color: var(--ink-950);
+  }
+  .hud .brand .by {
+    font-size: 14px; color: var(--fg-3); font-weight: 400;
+    padding-left: 12px; margin-left: 8px;
+    border-left: 1px solid var(--border-line);
+  }
+  .hud .demo {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    background: var(--status-warn-bg);
+    color: var(--status-warn);
+    border: 1px solid rgba(138, 90, 0, 0.28);
+    font-family: var(--font-mono);
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.14em;
+    border-radius: 3px;
+  }
+  .hud .demo .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--status-warn);
+    animation: blink 1600ms infinite;
+  }
+  @keyframes blink { 0%,60%{opacity:1} 80%{opacity:0.25} 100%{opacity:1} }
+  .hud .cuts {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-3);
+    letter-spacing: 0.14em;
+  }
+  .hud .cuts .cd {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gray-200);
+    transition: background 200ms;
+  }
+  .hud .cuts .cd.on { background: var(--ink-950); }
+
+  /* ===== SCENE BASE — display switch, not opacity ===== */
+  .scene {
+    position: absolute; inset: 0;
+    display: none !important;
+  }
+  .scene.on { display: block !important; }
+
+  /* ===== CAPTION (bottom bar) ===== */
+  .cap {
+    position: absolute;
+    left: 64px; right: 64px;
+    bottom: 88px;
+    z-index: 25;
+    pointer-events: none;
+  }
+  .cap[data-safe="cut3"] { left: 850px; }
+  /* Cut 4: on-screen heading itself carries the message ("남은 것..."),
+     so hide the caption to avoid overlap with the SOP-12 row. */
+  .cap[data-safe="cut4"] { display: none; }
+  .cap .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    min-height: 20px;
+  }
+  .cap .line {
+    font-size: 48px;
+    font-weight: 600;
+    color: var(--ink-950);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    min-height: 56px;
+  }
+  .cap .line strong {
+    font-weight: 700;
+    color: var(--signal-700);
+  }
+  .cap .line + .line { margin-top: 12px; }
+
+  /* ===== TIMER ===== */
+  .timer {
+    position: absolute;
+    right: 64px; bottom: 40px;
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+    letter-spacing: 0.08em;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .timer .bar {
+    width: 280px; height: 2px; background: var(--gray-150);
+    position: relative;
+  }
+  .timer .bar .fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: var(--ink-950);
+  }
+
+  /* ===== CONTROLS ===== */
+  #ctrls {
+    position: fixed;
+    bottom: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 100;
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(11, 18, 32, 0.94);
+    color: #ECEEF3;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  #ctrls button {
+    background: transparent; border: 1px solid rgba(236,238,243,0.28);
+    color: inherit; padding: 6px 14px; border-radius: 999px;
+    font-family: inherit; font-size: 11px; cursor: pointer;
+    letter-spacing: 0.06em;
+  }
+  #ctrls button:hover { border-color: rgba(236,238,243,0.7); }
+  #ctrls .time { font-variant-numeric: tabular-nums; min-width: 100px; text-align: center; }
+  #ctrls .scrub {
+    width: 340px; height: 4px; background: rgba(236,238,243,0.18);
+    position: relative; border-radius: 2px; cursor: pointer;
+  }
+  #ctrls .scrub .knob {
+    position: absolute; top: 0; bottom: 0; left: 0; width: 0%;
+    background: #ECEEF3; border-radius: 2px;
+  }
+
+  /* ==========================================================
+     CUT 1 — 견적서 3장
+     ========================================================== */
+  #cut1 .title-block {
+    position: absolute;
+    top: 200px; left: 128px;
+    max-width: 900px;
+  }
+  #cut1 .title-block .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  #cut1 .title-block h1 {
+    font-size: 64px;
+    font-weight: 600;
+    color: var(--ink-950);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0;
+  }
+  #cut1 .quotes {
+    position: absolute;
+    right: 96px;
+    top: 200px;
+    display: flex; gap: 24px;
+    perspective: 1600px;
+  }
+  #cut1 .qc {
+    width: 340px; height: 620px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-hair);
+    box-shadow: 0 2px 4px rgba(11,18,32,0.04), 0 24px 60px rgba(11,18,32,0.10);
+    padding: 32px;
+    position: relative;
+    transform-origin: center bottom;
+    opacity: 0;
+    transform: translateY(30px) rotateZ(0deg);
+    transition: opacity 380ms cubic-bezier(0.2,0,0,1), transform 380ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut1 .qc.on { opacity: 1; }
+  #cut1 .qc.q1.on { transform: translateY(0) rotateZ(-3deg); }
+  #cut1 .qc.q2.on { transform: translateY(-20px) rotateZ(1deg); z-index: 2; }
+  #cut1 .qc.q3.on { transform: translateY(0) rotateZ(2.5deg); }
+  #cut1 .qc .meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-3);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-hair);
+    display: flex; justify-content: space-between;
+  }
+  #cut1 .qc .qt {
+    margin-top: 24px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink-950);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  #cut1 .qc .vd {
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+  }
+  #cut1 .qc .lines { margin-top: 28px; }
+  #cut1 .qc .ln {
+    display: flex; justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border-hair);
+    font-size: 14px;
+    color: var(--fg-2);
+  }
+  #cut1 .qc .ln .n {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-3);
+  }
+  #cut1 .qc .tot {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 2px solid var(--ink-950);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  #cut1 .qc .tot .l {
+    font-family: var(--font-mono);
+    font-size: 12px; color: var(--fg-3);
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  #cut1 .qc .tot .a {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink-950);
+    font-variant-numeric: tabular-nums;
+  }
+  #cut1 .qc .stamp {
+    position: absolute;
+    right: 24px; bottom: 20px;
+    color: var(--gray-300);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    border: 1.5px solid var(--gray-300);
+    padding: 4px 10px;
+    border-radius: 3px;
+    transform: rotate(-8deg);
+  }
+
+  /* ==========================================================
+     CUT 2 — 5구간 타임라인
+     ========================================================== */
+  #cut2 .c2wrap {
+    padding: 220px 128px 260px;
+  }
+  #cut2 .c2eyebrow {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    opacity: 0;
+    transition: opacity 320ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut2 .c2eyebrow.on { opacity: 1; }
+  #cut2 .c2head {
+    font-size: 48px;
+    font-weight: 600;
+    color: var(--ink-950);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    max-width: 1400px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 320ms cubic-bezier(0.2,0,0,1),
+                transform 320ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut2 .c2head.on { opacity: 1; transform: translateY(0); }
+  #cut2 .c2head .kw {
+    background: linear-gradient(180deg, transparent 68%, var(--signal-100) 68%);
+    padding: 0 6px;
+  }
+  #cut2 .c2note {
+    position: absolute;
+    top: 220px; right: 128px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-3);
+    letter-spacing: 0.06em;
+    border: 1px dashed var(--border-line);
+    padding: 8px 14px;
+    opacity: 0;
+    transition: opacity 320ms cubic-bezier(0.2,0,0,1) 300ms;
+  }
+  #cut2 .c2note.on { opacity: 1; }
+  #cut2 .track {
+    position: relative;
+    height: 2px;
+    background: var(--gray-150);
+    margin-top: 140px;
+  }
+  #cut2 .track .fill {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    width: 0%;
+    background: var(--ink-950);
+    transition: width 1000ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut2 .stepgrid {
+    position: absolute;
+    top: -32px; left: 0; right: 0;
+    display: grid; grid-template-columns: repeat(5, 1fr);
+  }
+  #cut2 .stp {
+    position: relative;
+    padding-left: 24px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 320ms cubic-bezier(0.2,0,0,1),
+                transform 320ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut2 .stp.on { opacity: 1; transform: translateY(0); }
+  #cut2 .stp::before {
+    content: '';
+    position: absolute; left: 0; top: 48px;
+    width: 14px; height: 14px;
+    background: var(--gray-25);
+    border: 2px solid var(--gray-300);
+    border-radius: 50%;
+    transform: translate(-1px, 0);
+    transition: background 200ms, border-color 200ms;
+  }
+  #cut2 .stp.on::before {
+    background: var(--ink-950);
+    border-color: var(--ink-950);
+  }
+  #cut2 .stp .n {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+    letter-spacing: 0.18em;
+    margin-bottom: 8px;
+  }
+  #cut2 .stp .nm {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--ink-950);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-top: 56px;
+  }
+  #cut2 .stp .cl {
+    margin-top: 14px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+    letter-spacing: 0.04em;
+  }
+
+  /* ==========================================================
+     CUT 3 — 스마트폰 현장 (핵심 8초)
+     ========================================================== */
+  #cut3 .c3grid {
+    display: grid;
+    grid-template-columns: 720px 1fr;
+    height: 1080px;
+    align-items: center;
+  }
+  #cut3 .phcol {
+    padding-left: 96px;
+    display: flex; justify-content: center;
+  }
+  #cut3 .phone {
+    position: relative;
+    width: 440px; height: 900px;
+    background: #0A0F1C;
+    border-radius: 56px;
+    padding: 14px;
+    box-shadow:
+      0 60px 120px rgba(11,18,32,0.28),
+      0 12px 24px rgba(11,18,32,0.14),
+      inset 0 0 0 2px #1A253E;
+  }
+  #cut3 .phone::after {
+    content: '';
+    position: absolute;
+    top: 22px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 30px;
+    background: #0A0F1C;
+    border-radius: 999px;
+    z-index: 3;
+  }
+  #cut3 .screen {
+    width: 100%; height: 100%;
+    background: var(--gray-25);
+    border-radius: 44px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  #cut3 .sbar {
+    height: 46px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 30px 0 34px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--ink-950);
+    font-weight: 500;
+    z-index: 5;
+  }
+  #cut3 .apptop {
+    padding: 12px 20px 16px;
+    border-bottom: 1px solid var(--border-hair);
+    display: flex; align-items: center; gap: 10px;
+    z-index: 5;
+    background: var(--gray-25);
+  }
+  #cut3 .apptop .back { color: var(--fg-2); }
+  #cut3 .apptop .tb { flex: 1; }
+  #cut3 .apptop .t {
+    font-size: 15px; font-weight: 600; color: var(--ink-950);
+  }
+  #cut3 .apptop .st {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-3); margin-top: 2px; letter-spacing: 0.08em;
+  }
+  #cut3 .photo {
+    margin: 16px 20px 0;
+    flex: 1 1 auto;
+    min-height: 520px;
+    border: 1px solid var(--border-hair);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    background: #0B1220;
+  }
+  /* server rack faux photo */
+  #cut3 .photo::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        #2E3E5F 0px, #2E3E5F 24px,
+        #253352 24px, #253352 26px,
+        #364566 26px, #364566 28px,
+        #253352 28px, #253352 50px,
+        #1A253E 50px, #1A253E 52px
+      );
+  }
+  #cut3 .photo::after {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(15,92,94,0.4) 0, transparent 20%),
+      radial-gradient(circle at 70% 20%, rgba(11,61,145,0.5) 0, transparent 15%),
+      radial-gradient(circle at 25% 70%, rgba(11,61,145,0.6) 0, transparent 18%),
+      radial-gradient(circle at 60% 60%, rgba(15,92,94,0.55) 0, transparent 15%),
+      radial-gradient(circle at 45% 45%, rgba(23,88,204,0.5) 0, transparent 12%);
+  }
+  #cut3 .photo-tag {
+    position: absolute;
+    bottom: 14px; left: 14px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: rgba(245,244,239,0.85);
+    letter-spacing: 0.14em;
+    padding: 4px 8px;
+    background: rgba(11,18,32,0.65);
+    border-radius: 2px;
+    z-index: 2;
+  }
+  #cut3 .target {
+    position: absolute;
+    top: 40%; left: 40%; width: 20%; height: 20%;
+    border: 2.5px solid #F5F4EF;
+    border-radius: 2px;
+    z-index: 2;
+    opacity: 0;
+    transform: scale(1.6);
+    transition: opacity 200ms, transform 400ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut3 .target.on {
+    opacity: 1;
+    transform: scale(1);
+  }
+  #cut3 .capbtn {
+    position: absolute;
+    bottom: 30px; left: 50%; transform: translateX(-50%);
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: #F5F4EF;
+    border: 4px solid #F5F4EF;
+    box-shadow: inset 0 0 0 4px #0A0F1C;
+    z-index: 4;
+    transition: transform 140ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut3 .capbtn.press {
+    transform: translateX(-50%) scale(0.88);
+  }
+  #cut3 .sheet {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-hair);
+    border-radius: 24px 24px 0 0;
+    padding: 24px 22px 28px;
+    transform: translateY(110%);
+    transition: transform 440ms cubic-bezier(0.2, 0, 0, 1);
+    z-index: 6;
+    box-shadow: 0 -12px 40px rgba(11,18,32,0.1);
+  }
+  #cut3 .sheet.on { transform: translateY(0); }
+  #cut3 .sheet .grab {
+    width: 44px; height: 4px; background: var(--gray-200);
+    border-radius: 2px; margin: 0 auto 18px;
+  }
+  #cut3 .sheet .eb {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-3);
+    letter-spacing: 0.14em;
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  #cut3 .sheet .eb .aidot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--signal-700);
+    box-shadow: 0 0 0 4px var(--signal-100);
+  }
+  #cut3 .sheet .hd {
+    font-size: 16px;
+    color: var(--fg-2);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  #cut3 .chip {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    background: var(--signal-50);
+    border: 1.75px solid var(--signal-700);
+    border-radius: 8px;
+    transition: transform 140ms, box-shadow 140ms;
+  }
+  #cut3 .chip.press {
+    transform: translateY(1px);
+    box-shadow: inset 0 2px 0 rgba(11,61,145,0.15);
+  }
+  #cut3 .chip .code {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--signal-700);
+    padding: 5px 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--signal-700);
+    border-radius: 3px;
+  }
+  #cut3 .chip .desc {
+    flex: 1;
+    font-size: 14px;
+    color: var(--ink-950);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  #cut3 .chip .arrow {
+    color: var(--signal-700);
+  }
+  #cut3 .cursor {
+    position: absolute;
+    left: 60px; top: 780px;
+    width: 28px; height: 34px;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    filter: drop-shadow(0 3px 6px rgba(11,18,32,0.35));
+    transition: opacity 220ms, left 700ms cubic-bezier(0.2,0,0,1), top 700ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut3 .toast {
+    position: absolute;
+    left: 20px; right: 20px; bottom: 20px;
+    background: var(--ink-950);
+    color: var(--fg-on-ink);
+    padding: 16px 18px;
+    border-radius: 10px;
+    display: flex; align-items: center; gap: 12px;
+    transform: translateY(160%);
+    transition: transform 340ms cubic-bezier(0.2,0,0,1);
+    z-index: 7;
+  }
+  #cut3 .toast.on { transform: translateY(0); }
+  #cut3 .toast .ck {
+    width: 24px; height: 24px;
+    background: var(--status-ok);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: white;
+    flex-shrink: 0;
+  }
+  #cut3 .toast .m { font-size: 14px; font-weight: 500; }
+  #cut3 .toast .s { font-size: 12px; color: rgba(236,238,243,0.6); font-family: var(--font-mono); margin-top: 3px; }
+
+  /* Right side — audit log */
+  #cut3 .logcol {
+    padding: 100px 128px 100px 96px;
+    align-self: stretch;
+    display: flex; flex-direction: column; justify-content: center;
+    border-left: 1px solid var(--border-hair);
+    height: 100%;
+  }
+  #cut3 .logeb {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  #cut3 .logtt {
+    font-size: 38px;
+    font-weight: 600;
+    color: var(--ink-950);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  #cut3 .logsub {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: var(--fg-3);
+    margin-bottom: 40px;
+    letter-spacing: 0.02em;
+  }
+  #cut3 .logstream {
+    border-top: 1px solid var(--border-hair);
+  }
+  #cut3 .lgr {
+    display: grid;
+    grid-template-columns: 100px 140px 1fr auto;
+    gap: 24px;
+    padding: 18px 8px;
+    border-bottom: 1px solid var(--border-hair);
+    font-size: 15px;
+    color: var(--fg-2);
+    align-items: baseline;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 320ms cubic-bezier(0.2,0,0,1),
+                transform 320ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut3 .lgr.on { opacity: 1; transform: translateY(0); }
+  #cut3 .lgr.hi {
+    background: var(--signal-50);
+    border-left: 3px solid var(--signal-700);
+    padding-left: 14px;
+    margin-left: -3px;
+  }
+  #cut3 .lgr .tm {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+  }
+  #cut3 .lgr .cs {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--ink-950);
+    font-weight: 500;
+  }
+  #cut3 .lgr .ac { color: var(--ink-950); font-weight: 500; }
+  #cut3 .lgr .ac .by { color: var(--fg-3); font-weight: 400; font-size: 13px; margin-left: 8px; }
+  #cut3 .lgr .stat {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--status-ok);
+    background: var(--status-ok-bg);
+    padding: 4px 10px;
+    border-radius: 3px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ==========================================================
+     CUT 4 — SOP 목록
+     ========================================================== */
+  #cut4 .c4wrap {
+    padding: 160px 96px 200px;
+  }
+  #cut4 .c4head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 48px;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 340ms cubic-bezier(0.2,0,0,1),
+                transform 340ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut4 .c4head.on { opacity: 1; transform: translateY(0); }
+  #cut4 .c4head .eb {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  #cut4 .c4head h2 {
+    font-size: 44px;
+    font-weight: 600;
+    color: var(--ink-950);
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1.15;
+  }
+  #cut4 .c4head h2 .kw {
+    background: linear-gradient(180deg, transparent 68%, var(--signal-100) 68%);
+    padding: 0 6px;
+  }
+  #cut4 .stats { display: flex; gap: 40px; }
+  #cut4 .stats .st {
+    border-left: 1px solid var(--border-hair);
+    padding-left: 28px;
+  }
+  #cut4 .stats .n {
+    font-family: var(--font-mono);
+    font-size: 48px; font-weight: 500;
+    color: var(--ink-950);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  #cut4 .stats .n .of { color: var(--fg-3); font-size: 26px; }
+  #cut4 .stats .lbl {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-3);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 12px;
+  }
+  #cut4 .tblwrap {
+    position: relative;
+    border: 1px solid var(--border-hair);
+    background: var(--bg-surface);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 380ms cubic-bezier(0.2,0,0,1) 100ms,
+                transform 380ms cubic-bezier(0.2,0,0,1) 100ms;
+  }
+  #cut4 .tblwrap.on { opacity: 1; transform: translateY(0); }
+  #cut4 table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  #cut4 thead th {
+    text-align: left;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-3);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    background: var(--gray-50);
+  }
+  #cut4 tbody td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-hair);
+    font-size: 15px;
+    color: var(--fg-2);
+    vertical-align: middle;
+  }
+  #cut4 tbody tr:last-child td { border-bottom: 0; }
+  #cut4 tbody tr.pd { background: var(--status-warn-bg); }
+  #cut4 .did {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-950);
+    font-weight: 500;
+  }
+  #cut4 .cls {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-3);
+  }
+  #cut4 .dtl {
+    font-size: 15px;
+    color: var(--ink-950);
+    font-weight: 500;
+  }
+  #cut4 .own { font-size: 14px; color: var(--fg-2); }
+  #cut4 .own .rl { color: var(--fg-3); font-size: 12px; display: block; margin-top: 2px; }
+  #cut4 .rev {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-3);
+  }
+  #cut4 .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  #cut4 .badge.ac { background: var(--status-ok-bg); color: var(--status-ok); }
+  #cut4 .badge.pn {
+    background: var(--bg-surface);
+    color: var(--status-warn);
+    border: 1px solid rgba(138, 90, 0, 0.36);
+  }
+  #cut4 .badge .dt { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  #cut4 .hlbox {
+    position: absolute;
+    left: -3px; right: -3px;
+    top: 200px; height: 340px;
+    border: 3px solid var(--signal-700);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 300ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut4 .hlbox.on { opacity: 1; }
+  #cut4 .hlbox .tag {
+    position: absolute;
+    right: -3px; top: -36px;
+    background: var(--signal-700);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 6px 12px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ==========================================================
+     CUT 5 — 인증 개요 D-85
+     ========================================================== */
+  #cut5 .c5grid {
+    padding: 160px 96px 220px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    height: 100%;
+  }
+  #cut5 .cert {
+    border: 1px solid var(--border-hair);
+    background: var(--bg-surface);
+    padding: 48px 44px 40px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 380ms cubic-bezier(0.2,0,0,1),
+                transform 380ms cubic-bezier(0.2,0,0,1);
+  }
+  #cut5 .cert.on { opacity: 1; transform: translateY(0); }
+  #cut5 .cert .eb {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  #cut5 .cert h3 {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--ink-950);
+    letter-spacing: -0.015em;
+    margin: 0;
+    line-height: 1.25;
+  }
+  #cut5 .cert .status {
+    margin-top: 24px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  #cut5 .cert .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    background: var(--status-ok-bg);
+    color: var(--status-ok);
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 999px;
+  }
+  #cut5 .cert .pill .d { width: 8px; height: 8px; border-radius: 50%; background: var(--status-ok); }
+  #cut5 .cert .base {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-3);
+  }
+  #cut5 .cert .grid {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--border-hair);
+  }
+  #cut5 .cert .cell {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border-hair);
+  }
+  #cut5 .cert .cell:nth-child(odd) {
+    padding-right: 28px;
+    border-right: 1px solid var(--border-hair);
+  }
+  #cut5 .cert .cell:nth-child(even) { padding-left: 28px; }
+  #cut5 .cert .cell .l {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-3);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  #cut5 .cert .cell .v {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    color: var(--ink-950);
+    font-weight: 500;
+    margin-top: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  #cut5 .dday {
+    border: 1px solid var(--ink-950);
+    background: var(--ink-950);
+    color: var(--fg-on-ink);
+    padding: 48px 44px 40px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 380ms cubic-bezier(0.2,0,0,1) 120ms,
+                transform 380ms cubic-bezier(0.2,0,0,1) 120ms;
+  }
+  #cut5 .dday.on { opacity: 1; transform: translateY(0); }
+  #cut5 .dday::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(245,244,239,0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(245,244,239,0.04) 1px, transparent 1px);
+    background-size: 8px 8px;
+    pointer-events: none;
+  }
+  #cut5 .dday .eb {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: rgba(236,238,243,0.55);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  #cut5 .dday h3 {
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--fg-on-ink);
+    margin: 0;
+    position: relative;
+    line-height: 1.3;
+  }
+  #cut5 .dday .count {
+    margin-top: 32px;
+    display: flex; align-items: baseline; gap: 12px;
+    position: relative;
+  }
+  #cut5 .dday .count .dm {
+    font-size: 52px;
+    color: rgba(236,238,243,0.55);
+    font-weight: 300;
+  }
+  #cut5 .dday .count .n {
+    font-family: var(--font-mono);
+    font-size: 160px;
+    font-weight: 400;
+    color: var(--fg-on-ink);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    min-width: 300px;
+    display: inline-block;
+  }
+  #cut5 .dday .count .u {
+    font-size: 22px;
+    color: rgba(236,238,243,0.55);
+    letter-spacing: 0.06em;
+  }
+  #cut5 .dday .sub {
+    margin-top: 18px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: rgba(236,238,243,0.75);
+    letter-spacing: 0.06em;
+    position: relative;
+  }
+  #cut5 .dday .difs {
+    margin-top: 40px;
+    border-top: 1px solid rgba(236,238,243,0.16);
+    padding-top: 22px;
+    position: relative;
+  }
+  #cut5 .dday .difs .l {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: rgba(236,238,243,0.5);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  #cut5 .dday .df {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 14px;
+    padding: 10px 0;
+    align-items: baseline;
+    font-size: 14px;
+    color: rgba(236,238,243,0.9);
+    border-bottom: 1px solid rgba(236,238,243,0.08);
+  }
+  #cut5 .dday .df:last-child { border-bottom: 0; }
+  #cut5 .dday .df .idx {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: rgba(236,238,243,0.5);
+  }
+  #cut5 .dday .df .sv {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  #cut5 .dday .df .sv.h { background: rgba(224,133,133,0.16); color: #E08585; }
+  #cut5 .dday .df .sv.m { background: rgba(224,176,96,0.16); color: #E0B060; }
+  #cut5 .dday .df .sv.l { background: rgba(111,191,149,0.16); color: #6FBF95; }
+
+  /* ==========================================================
+     ENDCARD
+     ========================================================== */
+  #endc {
+    background: var(--ink-950);
+    color: var(--fg-on-ink);
+    padding: 120px 128px;
+    display: flex; flex-direction: column; justify-content: center;
+    position: absolute; inset: 0;
+  }
+  #endc::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(245,244,239,0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(245,244,239,0.03) 1px, transparent 1px);
+    background-size: 8px 8px;
+    pointer-events: none;
+  }
+  #endc .wm {
+    display: flex; align-items: center; gap: 24px;
+    margin-bottom: 44px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 420ms cubic-bezier(0.2,0,0,1),
+                transform 420ms cubic-bezier(0.2,0,0,1);
+  }
+  #endc.on .wm { opacity: 1; transform: translateY(0); }
+  #endc .wm svg { width: 72px; height: 72px; }
+  #endc .wm .nm {
+    font-size: 96px;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+  #endc .tag {
+    font-size: 30px;
+    color: rgba(236,238,243,0.82);
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+    margin-bottom: 64px;
+    max-width: 1100px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 420ms cubic-bezier(0.2,0,0,1) 120ms,
+                transform 420ms cubic-bezier(0.2,0,0,1) 120ms;
+  }
+  #endc.on .tag { opacity: 1; transform: translateY(0); }
+  #endc .meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 56px;
+    border-top: 1px solid rgba(236,238,243,0.16);
+    padding-top: 36px;
+    max-width: 1500px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 420ms cubic-bezier(0.2,0,0,1) 240ms,
+                transform 420ms cubic-bezier(0.2,0,0,1) 240ms;
+  }
+  #endc.on .meta { opacity: 1; transform: translateY(0); }
+  #endc .meta .l {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: rgba(236,238,243,0.5);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  #endc .meta .v {
+    font-family: var(--font-mono);
+    font-size: 19px;
+    color: var(--fg-on-ink);
+    line-height: 1.55;
+  }
+  #endc .meta .v.big {
+    font-family: var(--font-sans);
+    font-size: 24px;
+    font-weight: 500;
+  }
+  #endc .meta .sm {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: rgba(236,238,243,0.55);
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div id="wrap">
+  <div id="stage">
+
+    <!-- HUD -->
+    <div class="hud" id="hud">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L3 6v6c0 5 4 8 9 10 5-2 9-5 9-10V6l-9-4z"/>
+          <path d="M8.5 12l2.5 2.5L15.5 10"/>
+        </svg>
+        <span class="name">FieldProof</span>
+        <span class="by">by Quanternity AI</span>
+      </div>
+      <div class="demo"><span class="dot"></span>DEMO DATA</div>
+      <div class="cuts">
+        <span>CUT</span>
+        <span class="cd" data-cut="1"></span>
+        <span class="cd" data-cut="2"></span>
+        <span class="cd" data-cut="3"></span>
+        <span class="cd" data-cut="4"></span>
+        <span class="cd" data-cut="5"></span>
+      </div>
+    </div>
+
+    <!-- ============ CUT 1 : 견적서 3장 ============ -->
+    <div class="scene" id="cut1">
+      <div class="title-block">
+        <div class="eyebrow">§ 문제 인식</div>
+        <h1>이 업체들, 뭐가 다르죠?</h1>
+      </div>
+      <div class="quotes">
+        <div class="qc q1">
+          <div class="meta"><span>QUOTATION</span><span>Q-2026-041</span></div>
+          <div class="qt">ISO/IEC 42001<br/>인증 컨설팅</div>
+          <div class="vd">A 컨설팅 그룹</div>
+          <div class="lines">
+            <div class="ln"><span>현황 진단</span><span class="n">₩ 8,400,000</span></div>
+            <div class="ln"><span>문서 체계</span><span class="n">₩12,000,000</span></div>
+            <div class="ln"><span>운영·증적</span><span class="n">₩ 9,600,000</span></div>
+            <div class="ln"><span>내부심사</span><span class="n">₩ 6,400,000</span></div>
+            <div class="ln"><span>심사 대응</span><span class="n">₩ 5,600,000</span></div>
+          </div>
+          <div class="tot"><span class="l">합계</span><span class="a">42,000,000</span></div>
+          <div class="stamp">SUBMITTED</div>
+        </div>
+        <div class="qc q2">
+          <div class="meta"><span>QUOTATION</span><span>Q-2026-062</span></div>
+          <div class="qt">AI 경영시스템<br/>구축 컨설팅</div>
+          <div class="vd">B 어드바이저리</div>
+          <div class="lines">
+            <div class="ln"><span>현황 진단</span><span class="n">₩ 9,000,000</span></div>
+            <div class="ln"><span>문서화·SoA</span><span class="n">₩11,000,000</span></div>
+            <div class="ln"><span>운영 지원</span><span class="n">₩10,000,000</span></div>
+            <div class="ln"><span>내부심사</span><span class="n">₩ 7,000,000</span></div>
+            <div class="ln"><span>심사 대응</span><span class="n">₩ 6,000,000</span></div>
+          </div>
+          <div class="tot"><span class="l">합계</span><span class="a">43,000,000</span></div>
+          <div class="stamp">SUBMITTED</div>
+        </div>
+        <div class="qc q3">
+          <div class="meta"><span>QUOTATION</span><span>Q-2026-088</span></div>
+          <div class="qt">ISO 42001<br/>인증 대응 프로젝트</div>
+          <div class="vd">C 파트너스</div>
+          <div class="lines">
+            <div class="ln"><span>Gap·리스크</span><span class="n">₩ 8,800,000</span></div>
+            <div class="ln"><span>절차서 12종</span><span class="n">₩12,500,000</span></div>
+            <div class="ln"><span>증적·운영</span><span class="n">₩ 9,200,000</span></div>
+            <div class="ln"><span>내부심사</span><span class="n">₩ 6,000,000</span></div>
+            <div class="ln"><span>심사 대응</span><span class="n">₩ 5,500,000</span></div>
+          </div>
+          <div class="tot"><span class="l">합계</span><span class="a">42,000,000</span></div>
+          <div class="stamp">SUBMITTED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CUT 2 : 5구간 타임라인 ============ -->
+    <div class="scene" id="cut2">
+      <div class="c2wrap">
+        <div class="c2eyebrow" id="c2eb">FIELDPROOF · 준비 프로그램</div>
+        <div class="c2note" id="c2note">날짜·주차 표기 없음 · 인증 취득을 보장하지 않습니다</div>
+        <div class="c2head" id="c2head">현황진단부터 심사대응까지, 다섯 구간이 <span class="kw">하나의 화면에</span> 남습니다.</div>
+        <div class="track">
+          <div class="fill" id="c2fill"></div>
+          <div class="stepgrid">
+            <div class="stp" data-i="0">
+              <div class="n">01</div>
+              <div class="nm">현황진단</div>
+              <div class="cl">§ 4 · Gap 분석</div>
+            </div>
+            <div class="stp" data-i="1">
+              <div class="n">02</div>
+              <div class="nm">문서체계</div>
+              <div class="cl">§ 5–7 · 절차서 12종</div>
+            </div>
+            <div class="stp" data-i="2">
+              <div class="n">03</div>
+              <div class="nm">운영·증적</div>
+              <div class="cl">§ 8 · A.6–A.10</div>
+            </div>
+            <div class="stp" data-i="3">
+              <div class="n">04</div>
+              <div class="nm">내부심사</div>
+              <div class="cl">§ 9.1–9.2</div>
+            </div>
+            <div class="stp" data-i="4">
+              <div class="n">05</div>
+              <div class="nm">심사대응</div>
+              <div class="cl">§ 9.3 · § 10</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CUT 3 : 스마트폰 현장 ============ -->
+    <div class="scene" id="cut3">
+      <div class="c3grid">
+        <div class="phcol">
+          <div class="phone">
+            <div class="screen">
+              <div class="sbar">
+                <span>09:41</span>
+                <span style="display:flex;gap:6px;align-items:center;">
+                  <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="2.5" height="4"/><rect x="4.5" y="5" width="2.5" height="7"/><rect x="9" y="2" width="2.5" height="10"/><rect x="13.5" y="0" width="2.5" height="12" opacity="0.35"/></svg>
+                  <span style="font-size:12px;">88%</span>
+                </span>
+              </div>
+              <div class="apptop">
+                <div class="back">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </div>
+                <div class="tb">
+                  <div class="t">현장 증적 · 서버룸 A동</div>
+                  <div class="st">SYS-01 · CARDIOVISION AI</div>
+                </div>
+              </div>
+              <div class="photo">
+                <div class="target" id="c3tg"></div>
+                <div class="photo-tag">2026-08-14 · 09:41 · 37.5236°N 127.0455°E</div>
+              </div>
+              <div class="capbtn" id="c3cap"></div>
+              <div class="sheet" id="c3sh">
+                <div class="grab"></div>
+                <div class="eb"><span class="aidot"></span>FIELDPROOF · AI 제안 · 담당자 확정 필요</div>
+                <div class="hd">사진·위치·시간 기반으로 다음 조항이 매핑됩니다.</div>
+                <div class="chip" id="c3ch">
+                  <span class="code">A.6.2.4</span>
+                  <span class="desc">AI 시스템 검증 · 물리적 환경 통제</span>
+                  <svg class="arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+              <div class="toast" id="c3ts">
+                <div class="ck">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                </div>
+                <div>
+                  <div class="m">A.6.2.4 조항에 증적이 확정되었습니다.</div>
+                  <div class="s">EVID-2026-0814-A · 감사로그 기록됨</div>
+                </div>
+              </div>
+              <svg class="cursor" id="c3cur" viewBox="0 0 24 30" fill="none">
+                <path d="M2 2 L2 22 L8 17 L12 27 L15 25 L11 15 L20 15 Z"
+                  fill="#F5F4EF" stroke="#0B1220" stroke-width="1.6" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="logcol">
+          <div class="logeb">AUDIT LOG · 감사로그 · TENANT NORTHGATE</div>
+          <div class="logtt">모든 확정은 이 원장에<br/>기록됩니다.</div>
+          <div class="logsub">EVID → SOP → Baseline Diff</div>
+          <div class="logstream">
+            <div class="lgr" data-r="0">
+              <span class="tm">09:38</span>
+              <span class="cs">A.8.29</span>
+              <span class="ac">보안 로깅 정책 검토<span class="by">· 배승우 정보보호팀장</span></span>
+              <span class="stat">확정</span>
+            </div>
+            <div class="lgr" data-r="1">
+              <span class="tm">09:40</span>
+              <span class="cs">A.7.4</span>
+              <span class="ac">학습데이터 출처 갱신<span class="by">· 문세영 AI품질담당</span></span>
+              <span class="stat">확정</span>
+            </div>
+            <div class="lgr hi" data-r="2">
+              <span class="tm">09:41</span>
+              <span class="cs">A.6.2.4</span>
+              <span class="ac">AI 시스템 검증 · 물리 환경<span class="by">· 강민석 CISO 승인</span></span>
+              <span class="stat">확정</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CUT 4 : SOP 목록 ============ -->
+    <div class="scene" id="cut4">
+      <div class="c4wrap">
+        <div class="c4head" id="c4head">
+          <div class="ts">
+            <div class="eb">§ 문서체계 · 12대 절차서</div>
+            <h2><span class="kw">남은 것</span>과, 그것을 맡을 사람이 매일 보입니다.</h2>
+          </div>
+          <div class="stats">
+            <div class="st">
+              <div class="n">8<span class="of"> / 12</span></div>
+              <div class="lbl">운영중 · Active</div>
+            </div>
+            <div class="st">
+              <div class="n">4</div>
+              <div class="lbl">미운영 · Pending</div>
+            </div>
+            <div class="st">
+              <div class="n">66.7<span class="of">%</span></div>
+              <div class="lbl">운영률</div>
+            </div>
+          </div>
+        </div>
+        <div class="tblwrap" id="c4tbl">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:80px;">문서</th>
+                <th style="width:200px;">조항</th>
+                <th>제목</th>
+                <th style="width:240px;">담당자</th>
+                <th style="width:180px;">최근 개정</th>
+                <th style="width:140px;">상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="did">SOP-06</td>
+                <td class="cls">7.2 · 7.3 · 7.4 · 7.5</td>
+                <td class="dtl">역량·의사소통·문서관리 절차서</td>
+                <td class="own">오하린<span class="rl">인사·운영담당</span></td>
+                <td class="rev">Rev. 1.0 · 2026-07-20</td>
+                <td><span class="badge ac"><span class="dt"></span>운영중</span></td>
+              </tr>
+              <tr>
+                <td class="did">SOP-07</td>
+                <td class="cls">8.2 · A.6.2</td>
+                <td class="dtl">AI 시스템 수명주기 관리 절차서</td>
+                <td class="own">유태경<span class="rl">기술이사</span></td>
+                <td class="rev">Rev. 1.1 · 2026-07-15</td>
+                <td><span class="badge ac"><span class="dt"></span>운영중</span></td>
+              </tr>
+              <tr>
+                <td class="did">SOP-08</td>
+                <td class="cls">A.7 · A.7.2 · A.7.4</td>
+                <td class="dtl">AI 학습데이터 품질·출처 관리 절차서</td>
+                <td class="own">문세영<span class="rl">AI품질담당</span></td>
+                <td class="rev">Rev. 1.0 · 2026-07-08</td>
+                <td><span class="badge ac"><span class="dt"></span>운영중</span></td>
+              </tr>
+              <tr class="pd">
+                <td class="did">SOP-09</td>
+                <td class="cls">A.10 · A.10.2 · A.10.3</td>
+                <td class="dtl">제3자·공급자 AI 관리 절차서</td>
+                <td class="own">노가영<span class="rl">구매·외주관리담당</span></td>
+                <td class="rev">미등록 · 초안 배정 필요</td>
+                <td><span class="badge pn"><span class="dt"></span>미운영</span></td>
+              </tr>
+              <tr class="pd">
+                <td class="did">SOP-10</td>
+                <td class="cls">9.1 · 9.2</td>
+                <td class="dtl">성과 모니터링·내부심사 절차서</td>
+                <td class="own">임도현<span class="rl">내부심사 담당</span></td>
+                <td class="rev">미등록 · 초안 배정 필요</td>
+                <td><span class="badge pn"><span class="dt"></span>미운영</span></td>
+              </tr>
+              <tr class="pd">
+                <td class="did">SOP-11</td>
+                <td class="cls">9.3</td>
+                <td class="dtl">경영검토 절차서</td>
+                <td class="own">강민석<span class="rl">CISO</span></td>
+                <td class="rev">미등록 · 초안 배정 필요</td>
+                <td><span class="badge pn"><span class="dt"></span>미운영</span></td>
+              </tr>
+              <tr class="pd">
+                <td class="did">SOP-12</td>
+                <td class="cls">10.1 · 10.2 · A.10.4</td>
+                <td class="dtl">부적합·시정조치 및 지속적 개선 절차서</td>
+                <td class="own">배승우<span class="rl">정보보호팀장</span></td>
+                <td class="rev">미등록 · 초안 배정 필요</td>
+                <td><span class="badge pn"><span class="dt"></span>미운영</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="hlbox" id="c4hl"><div class="tag"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CUT 5 : 인증 개요 D-85 ============ -->
+    <div class="scene" id="cut5">
+      <div class="c5grid">
+        <div class="cert" id="c5cert">
+          <div class="eb">CERTIFICATE · 인증서 발행 완료</div>
+          <h3>노스게이트 AI 시스템즈<br/>ISO/IEC 42001</h3>
+          <div class="status">
+            <span class="pill"><span class="d"></span>유효 · Handover Complete</span>
+            <span class="base">인정 인증기관 발행</span>
+          </div>
+          <div class="grid">
+            <div class="cell"><div class="l">Baseline</div><div class="v">2026-05-02</div></div>
+            <div class="cell"><div class="l">Cert. Expiry</div><div class="v">2029-05-01</div></div>
+            <div class="cell"><div class="l">AI 시스템</div><div class="v">3 systems</div></div>
+            <div class="cell"><div class="l">Scheme</div><div class="v">ISO/IEC 42001</div></div>
+          </div>
+        </div>
+        <div class="dday" id="c5dd">
+          <div class="eb">SURVEILLANCE · 정기심사까지</div>
+          <h3>인증서를 받은 다음날부터<br/>다시 시작됩니다.</h3>
+          <div class="count">
+            <span class="dm">D −</span>
+            <span class="n" id="c5n">0</span>
+          </div>
+          <div class="sub">Next Surveillance · 2026-11-14</div>
+          <div class="difs">
+            <div class="l">Baseline Diff · 3건</div>
+            <div class="df">
+              <span class="idx">#02</span>
+              <span class="ti">AI 위험평가 임계점수 변경 · A.9.5.1</span>
+              <span class="sv h">HIGH</span>
+            </div>
+            <div class="df">
+              <span class="idx">#01</span>
+              <span class="ti">보안 로깅 정책 v2.0 제정 · A.8.29</span>
+              <span class="sv m">MED</span>
+            </div>
+            <div class="df">
+              <span class="idx">#00</span>
+              <span class="ti">Handover DB 무결성 검증 · 1,284건</span>
+              <span class="sv l">OK</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ENDCARD ============ -->
+    <div class="scene" id="endc">
+      <div class="wm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L3 6v6c0 5 4 8 9 10 5-2 9-5 9-10V6l-9-4z"/>
+          <path d="M8.5 12l2.5 2.5L15.5 10"/>
+        </svg>
+        <span class="nm">FieldProof</span>
+      </div>
+      <div class="tag" style="font-size: 38px;">ISO 42001·27001 통제 항목과 조직관련 업무 산출물을 실시간 연결하는 증적 관리 플랫폼</div>
+      <div class="meta">
+        <div class="col">
+          <div class="l">Standards</div>
+          <div class="v">ISO/IEC 42001<br/>ISO/IEC 27001<br/>ISO 13485</div>
+        </div>
+        <div class="col">
+          <div class="l">By</div>
+          <div class="v big">Quanternity AI<span class="sm">AI거버넌스-운영체계</span></div>
+        </div>
+        <div class="col">
+          <div class="l">Contact</div>
+          <div class="v">quanternity.kr<span class="sm"><a href="mailto:contact@quanternity.kr" style="color: inherit; text-decoration: none;">contact@quanternity.kr</a></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Caption -->
+    <div class="cap" id="cap">
+      <div class="eyebrow" id="capeb"></div>
+      <div class="line" id="capa"></div>
+      <div class="line" id="capb"></div>
+    </div>
+
+    <!-- Timer -->
+    <div class="timer" id="tmr">
+      <span id="tcur">00:00</span>
+      <div class="bar"><div class="fill" id="tfill"></div></div>
+      <span>00:30</span>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div id="ctrls">
+  <button id="bplay">▶ 재생</button>
+  <button id="brst">⟲</button>
+  <span class="time"><span id="ctime">00:00</span> / 00:30</span>
+  <div class="scrub" id="scrub"><div class="knob" id="sknob"></div></div>
+</div>
+
+<script>
+(function(){
+  const TOTAL = 30.0;
+
+  // ---- fit stage to viewport ----
+  function fitStage() {
+    const wrap = document.getElementById('wrap');
+    const stage = document.getElementById('stage');
+    const w = wrap.clientWidth || window.innerWidth;
+    const h = wrap.clientHeight || window.innerHeight;
+    const s = Math.min(w / 1920, h / 1080);
+    stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  fitStage();
+  // Second fit after fonts/layout settle
+  setTimeout(fitStage, 100);
+  setTimeout(fitStage, 500);
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+
+  const SCENES = ['cut1','cut2','cut3','cut4','cut5','endc'];
+
+  // Caption timeline
+  const CAPS = [
+    { at: 0.4,  eb: 'CUT 01 · 문제 인식',           a: '이 업체들, 뭐가 다르죠?' },
+    { at: 5.2,  eb: 'CUT 02 · 준비 프로그램',       a: '준비 과정 전체가 <strong>하나의 화면에</strong> 남습니다.' },
+    { at: 10.2, eb: 'CUT 03 · 현장에서',            a: '심사에 필요한 증적,', b: '<strong>현장에서 끝냅니다.</strong>' },
+    { at: 14.4, eb: 'CUT 03 · 현장에서',            a: 'AI는 제안하고,', b: '<strong>승인은 담당자가 합니다.</strong>' },
+    { at: 18.3, eb: 'CUT 04 · 문서체계',            a: '<strong>남은 것만</strong> 보입니다.' },
+    { at: 24.2, eb: 'CUT 05 · 정기심사',            a: '인증을 받은 다음날부터', b: '<strong>여기서부터 관리됩니다.</strong>' },
+    { at: 28.2, eb: null, a: null, b: null },
+  ];
+
+  function showScene(id) {
+    SCENES.forEach(s => {
+      document.getElementById(s).classList.toggle('on', s === id);
+    });
+    const map = { cut1:1, cut2:2, cut3:3, cut4:4, cut5:5, endc:5 };
+    $$('.cd').forEach(d => d.classList.toggle('on', +d.dataset.cut <= (map[id] || 0)));
+    // HUD: hide on cut1 (title moment) & endcard
+    $('#hud').classList.toggle('on', id !== 'cut1' && id !== 'endc');
+    // Caption safe area
+    const cap = $('#cap');
+    if (id === 'cut3' || id === 'cut4') cap.setAttribute('data-safe', id);
+    else cap.removeAttribute('data-safe');
+    // Hide timer on endcard
+    $('#tmr').style.opacity = (id === 'endc') ? '0' : '1';
+    // Hide caption entirely on endcard
+    cap.style.opacity = (id === 'endc') ? '0' : '1';
+  }
+
+  function updateCaption(t) {
+    let cur = null;
+    for (const c of CAPS) if (t >= c.at) cur = c;
+    const eb = $('#capeb'), a = $('#capa'), b = $('#capb');
+    if (!cur || !cur.a) {
+      eb.textContent = '';
+      a.innerHTML = ''; b.innerHTML = '';
+      return;
+    }
+    eb.textContent = cur.eb || '';
+    if (a.innerHTML !== (cur.a || '')) a.innerHTML = cur.a || '';
+    if (b.innerHTML !== (cur.b || '')) b.innerHTML = cur.b || '';
+  }
+
+  // -------- Per-cut anims (idempotent, scrub-safe) --------
+  function animCut1(t) {
+    // 0.3s → q1, 0.9s → q2, 1.5s → q3
+    const q1 = document.querySelector('#cut1 .q1');
+    const q2 = document.querySelector('#cut1 .q2');
+    const q3 = document.querySelector('#cut1 .q3');
+    q1.classList.toggle('on', t >= 0.3);
+    q2.classList.toggle('on', t >= 0.9);
+    q3.classList.toggle('on', t >= 1.5);
+  }
+  function animCut2(t) {
+    const lt = t - 5.0;
+    $('#c2eb').classList.toggle('on', lt >= 0.1);
+    $('#c2head').classList.toggle('on', lt >= 0.35);
+    $('#c2note').classList.toggle('on', lt >= 1.0);
+    // fill 0→100% during lt 0.5–3.5
+    const start = 0.5, dur = 3.0;
+    let p = 0;
+    if (lt >= start) p = Math.min(1, (lt - start) / dur);
+    $('#c2fill').style.width = (p * 100) + '%';
+    const stepTimes = [0.6, 1.15, 1.7, 2.25, 2.8];
+    $$('#cut2 .stp').forEach((el, i) => el.classList.toggle('on', lt >= stepTimes[i]));
+  }
+  function animCut3(t) {
+    const lt = t - 10.0;
+    // 10.0-12.0: 현장 촬영
+    // target pulse
+    $('#c3tg').classList.toggle('on', lt >= 0.4 && lt < 1.5);
+    $('#c3cap').classList.toggle('press', lt >= 1.2 && lt < 1.45);
+    // 12.0-14.5: 조항 칩 제안 (sheet up at 12.2)
+    $('#c3sh').classList.toggle('on', lt >= 2.2 && lt < 4.9);
+    // Cursor glides in 13.5 → 14.3
+    const cur = $('#c3cur');
+    if (lt >= 3.5 && lt < 5.4) {
+      cur.style.opacity = '1';
+      if (lt < 4.3) {
+        const p = Math.min(1, (lt - 3.5) / 0.8);
+        cur.style.left = (60 + 160 * p) + 'px';
+        cur.style.top  = (780 - 60 * p) + 'px';
+      } else {
+        cur.style.left = '220px';
+        cur.style.top  = '720px';
+      }
+    } else {
+      cur.style.opacity = '0';
+    }
+    // 14.45 chip press → 14.6 sheet down → 15.0 toast up
+    $('#c3ch').classList.toggle('press', lt >= 4.45 && lt < 4.63);
+    $('#c3ts').classList.toggle('on', lt >= 5.0 && lt < 7.9);
+    // Log rows appear 16.1, 16.6, 17.1
+    const times = [6.1, 6.6, 7.1];
+    $$('#cut3 .lgr').forEach((el, i) => el.classList.toggle('on', lt >= times[i]));
+  }
+  function animCut4(t) {
+    const lt = t - 18.0;
+    $('#c4head').classList.toggle('on', lt >= 0.15);
+    $('#c4tbl').classList.toggle('on', lt >= 0.5);
+    $('#c4hl').classList.toggle('on', lt >= 2.4);
+  }
+  function animCut5(t) {
+    const lt = t - 24.0;
+    $('#c5cert').classList.toggle('on', lt >= 0.2);
+    $('#c5dd').classList.toggle('on', lt >= 0.4);
+    // count 0 → 85 during lt 0.8-2.0
+    const nEl = $('#c5n');
+    if (lt < 0.8) nEl.textContent = '0';
+    else {
+      const p = Math.min(1, (lt - 0.8) / 1.2);
+      const e = 1 - Math.pow(1 - p, 3);
+      nEl.textContent = Math.round(e * 85);
+    }
+  }
+  function animEndc(t) {
+    // endc opacity states — since #endc has "on" class already when scene shown,
+    // apply the .on-triggered fades via extra class.
+    const el = $('#endc');
+    // Fade in the inner elements once scene visible; keyed on t.
+    // Already handled by CSS transitions attached to #endc.on .wm/.tag/.meta
+  }
+
+  // -------- Main tick --------
+  function tick(t) {
+    t = Math.max(0, Math.min(TOTAL, t));
+    let scene = 'cut1';
+    if (t >= 28.0) scene = 'endc';
+    else if (t >= 24.0) scene = 'cut5';
+    else if (t >= 18.0) scene = 'cut4';
+    else if (t >= 10.0) scene = 'cut3';
+    else if (t >= 5.0)  scene = 'cut2';
+    showScene(scene);
+
+    animCut1(t);
+    animCut2(t);
+    animCut3(t);
+    animCut4(t);
+    animCut5(t);
+    animEndc(t);
+    updateCaption(t);
+
+    const m = String(Math.floor(t / 60)).padStart(2, '0');
+    const s = String(Math.floor(t % 60)).padStart(2, '0');
+    const cs = String(Math.floor((t * 100) % 100)).padStart(2, '0');
+    $('#tcur').textContent = `${m}:${s}`;
+    $('#ctime').textContent = `${m}:${s}.${cs}`;
+    const pct = (t / TOTAL) * 100;
+    $('#tfill').style.width = pct + '%';
+    $('#sknob').style.width = pct + '%';
+  }
+
+  // -------- Playback --------
+  let playing = true;
+  let last = performance.now();
+  let curT = 0;
+
+  const KEY = 'fieldproof-demo-v2-t';
+  const sv = parseFloat(localStorage.getItem(KEY) || '0');
+  if (!isNaN(sv) && sv > 0 && sv < TOTAL - 0.5) curT = sv;
+
+  function loop(now) {
+    const dt = (now - last) / 1000;
+    last = now;
+    if (playing) {
+      curT += dt;
+      if (curT >= TOTAL) {
+        curT = TOTAL; playing = false;
+        $('#bplay').textContent = '↻ 다시 재생';
+      }
+      if (Math.random() < 0.08) localStorage.setItem(KEY, curT.toFixed(2));
+    }
+    tick(curT);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // -------- Controls --------
+  $('#bplay').addEventListener('click', () => {
+    if (curT >= TOTAL) {
+      curT = 0; playing = true;
+      $('#bplay').textContent = '❚❚ 일시정지';
+    } else {
+      playing = !playing;
+      $('#bplay').textContent = playing ? '❚❚ 일시정지' : '▶ 재생';
+    }
+  });
+  $('#brst').addEventListener('click', () => {
+    curT = 0; playing = true;
+    $('#bplay').textContent = '❚❚ 일시정지';
+  });
+  const scrub = $('#scrub');
+  let scrubbing = false;
+  scrub.addEventListener('mousedown', (e) => {
+    scrubbing = true;
+    playing = false;
+    $('#bplay').textContent = '▶ 재생';
+    const r = scrub.getBoundingClientRect();
+    curT = Math.max(0, Math.min(TOTAL, ((e.clientX - r.left) / r.width) * TOTAL));
+  });
+  window.addEventListener('mouseup', () => { scrubbing = false; });
+  window.addEventListener('mousemove', (e) => {
+    if (!scrubbing) return;
+    const r = scrub.getBoundingClientRect();
+    curT = Math.max(0, Math.min(TOTAL, ((e.clientX - r.left) / r.width) * TOTAL));
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); $('#bplay').click(); }
+    else if (e.key === 'r' || e.key === 'R') $('#brst').click();
+    else if (e.key === 'ArrowRight') curT = Math.min(TOTAL, curT + 0.5);
+    else if (e.key === 'ArrowLeft')  curT = Math.max(0, curT - 0.5);
+  });
+
+  // Expose for debugging
+  window.__demo = { tick, setT: (t) => { playing = false; curT = t; } };
+})();
+</script>
+</body>
+</html>

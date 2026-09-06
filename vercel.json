@@ -48,6 +48,10 @@
       "destination": "/insights/post.html"
     },
     {
+      "source": "/fieldproof-demo",
+      "destination": "/fieldproof-demo/index.html"
+    },
+    {
       "source": "/guidebooks",
       "destination": "/guidebooks.html"
     },

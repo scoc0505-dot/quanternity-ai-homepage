@@ -1,0 +1,347 @@
+/* =============================================================
+   Quanternity AI — colors_and_type.css
+   Institutional B2B compliance system. Deep Ink Navy + Signal Blue.
+   Light default, dark tokens available via [data-theme="dark"].
+   All spacing on 8px grid. Radius 4–6px only. Shadow used sparingly.
+   ============================================================= */
+
+/* -------- Fonts -------- */
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url("./fonts/Pretendard-Light.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("./fonts/Pretendard-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url("./fonts/Pretendard-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url("./fonts/Pretendard-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("./fonts/Pretendard-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("./fonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url("./fonts/JetBrainsMono-Medium.woff2") format("woff2");
+}
+
+/* =============================================================
+   TOKENS — LIGHT (default)
+   ============================================================= */
+:root {
+  /* ---- Brand primitives ---- */
+  --ink-950: #0B1220;   /* Deep Ink Navy — primary brand */
+  --ink-900: #111A2E;
+  --ink-800: #1A253E;
+  --ink-700: #253352;
+  --ink-600: #364566;
+
+  --signal-700: #0B3D91; /* Signal Blue — accent (single accent policy) */
+  --signal-600: #0E4CB3;
+  --signal-500: #1758CC;
+  --signal-400: #3A73D9;
+  --signal-100: #E4ECF9;
+  --signal-50:  #F1F5FC;
+
+  --teal-700: #0F5C5E;   /* Reserve accent (Deep Teal). Do not mix with Signal Blue in one screen. */
+  --teal-500: #1F8A8D;
+  --teal-100: #DDECEC;
+
+  /* ---- Neutrals (broad grayscale) ---- */
+  --gray-000: #FFFFFF;
+  --gray-25:  #FBFAF7;   /* Off-white background — page canvas */
+  --gray-50:  #F5F4EF;
+  --gray-100: #EEEDE7;
+  --gray-150: #E4E2DB;
+  --gray-200: #D6D3C9;
+  --gray-300: #B9B5A7;
+  --gray-400: #8F8B7C;
+  --gray-500: #6E6A5C;
+  --gray-600: #514E42;
+  --gray-700: #3B3830;
+  --gray-800: #26241F;
+  --gray-900: #171613;
+
+  /* ---- Semantic — Surface ---- */
+  --bg-page:      var(--gray-25);
+  --bg-surface:   #FFFFFF;
+  --bg-subtle:    var(--gray-50);
+  --bg-muted:     var(--gray-100);
+  --bg-inverse:   var(--ink-950);
+
+  /* ---- Semantic — Foreground ---- */
+  --fg-1:         var(--ink-950);   /* primary text */
+  --fg-2:         var(--gray-700);  /* body */
+  --fg-3:         var(--gray-500);  /* meta, captions */
+  --fg-4:         var(--gray-400);  /* placeholder, disabled */
+  --fg-on-ink:    #F5F4EF;          /* text on ink surfaces */
+  --fg-accent:    var(--signal-700);
+
+  /* ---- Semantic — Border ---- */
+  --border-hair:    var(--gray-150);
+  --border-line:    var(--gray-200);
+  --border-strong:  var(--gray-300);
+  --border-focus:   var(--signal-600);
+  --border-ink:     var(--ink-950);
+
+  /* ---- Semantic — Status ---- */
+  --status-info:    #1758CC;
+  --status-info-bg: #E4ECF9;
+  --status-ok:      #1F6B44;
+  --status-ok-bg:   #E1EFE6;
+  --status-warn:    #8A5A00;
+  --status-warn-bg: #F7ECD4;
+  --status-risk:    #A02929;
+  --status-risk-bg: #F5E1E1;
+
+  /* ---- Type family ---- */
+  --font-sans:  "Pretendard", "IBM Plex Sans KR", -apple-system, BlinkMacSystemFont,
+                "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ---- Type scale (8px vertical rhythm) ---- */
+  --fs-display: 56px;   --lh-display: 1.15;   --tr-display: -0.02em;
+  --fs-h1:      40px;   --lh-h1:      1.25;   --tr-h1:      -0.015em;
+  --fs-h2:      28px;   --lh-h2:      1.35;   --tr-h2:      -0.01em;
+  --fs-h3:      22px;   --lh-h3:      1.4;    --tr-h3:      -0.005em;
+  --fs-h4:      18px;   --lh-h4:      1.45;   --tr-h4:      0;
+  --fs-body:    17px;   --lh-body:    1.7;    --tr-body:    0;
+  --fs-body-sm: 15px;   --lh-body-sm: 1.65;   --tr-body-sm: 0;
+  --fs-caption: 13px;   --lh-caption: 1.5;    --tr-caption: 0.005em;
+  --fs-overline:11px;   --lh-overline:1.4;    --tr-overline:0.12em;
+  --fs-mono:    14px;   --lh-mono:    1.55;
+
+  /* ---- Weights ---- */
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  /* ---- Spacing (8px grid; 4 allowed as half-step) ---- */
+  --sp-0:   0;
+  --sp-1:   4px;
+  --sp-2:   8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  24px;
+  --sp-6:  32px;
+  --sp-7:  48px;
+  --sp-8:  64px;
+  --sp-9:  96px;
+  --sp-10:128px;
+
+  /* ---- Radius (kept small; institutional) ---- */
+  --radius-0: 0;
+  --radius-1: 2px;    /* hairline chips */
+  --radius-2: 4px;    /* default control radius */
+  --radius-3: 6px;    /* cards, larger surfaces */
+  --radius-pill: 999px; /* only for status pills */
+
+  /* ---- Elevation (minimal; prefer borders) ---- */
+  --shadow-0: none;
+  --shadow-1: 0 1px 0 0 rgba(11, 18, 32, 0.04);
+  --shadow-2: 0 1px 2px rgba(11, 18, 32, 0.06), 0 0 0 1px rgba(11, 18, 32, 0.04);
+  --shadow-3: 0 4px 16px rgba(11, 18, 32, 0.08), 0 0 0 1px rgba(11, 18, 32, 0.04);
+  --shadow-focus: 0 0 0 3px rgba(23, 88, 204, 0.28);
+
+  /* ---- Layout ---- */
+  --container-max: 1200px;
+  --container-narrow: 800px;
+  --gutter: 24px;
+  --rail: 240px;
+
+  /* ---- Motion ---- */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emph:     cubic-bezier(0.2, 0, 0, 1.1);
+}
+
+/* =============================================================
+   TOKENS — DARK
+   ============================================================= */
+[data-theme="dark"] {
+  --bg-page:      #0A0F1C;
+  --bg-surface:   #101828;
+  --bg-subtle:    #14203A;
+  --bg-muted:     #1A2A48;
+  --bg-inverse:   #F5F4EF;
+
+  --fg-1:         #ECEEF3;
+  --fg-2:         #C7CDD9;
+  --fg-3:         #8F98AA;
+  --fg-4:         #626B7E;
+  --fg-on-ink:    #ECEEF3;
+  --fg-accent:    #6E96E8;
+
+  --border-hair:   #1E2A44;
+  --border-line:   #2A3A5A;
+  --border-strong: #3E5178;
+  --border-focus:  #6E96E8;
+  --border-ink:    #ECEEF3;
+
+  --status-info:    #6E96E8;
+  --status-info-bg: #17233F;
+  --status-ok:      #6FBF95;
+  --status-ok-bg:   #14261D;
+  --status-warn:    #E0B060;
+  --status-warn-bg: #2A1F0F;
+  --status-risk:    #E08585;
+  --status-risk-bg: #2A1414;
+
+  --shadow-1: 0 1px 0 0 rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-3: 0 4px 16px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-focus: 0 0 0 3px rgba(110, 150, 232, 0.35);
+}
+
+/* =============================================================
+   BASE ELEMENT DEFAULTS (semantic mapping)
+   ============================================================= */
+html {
+  font-family: var(--font-sans);
+  color: var(--fg-1);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "kern", "liga";
+}
+
+body {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--fg-2);
+  background: var(--bg-page);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--fg-1);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tr-h2);
+  margin: 0;
+  text-wrap: balance;
+}
+h1 { font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: var(--tr-h1); font-weight: var(--fw-semibold); }
+h2 { font-size: var(--fs-h2); line-height: var(--lh-h2); letter-spacing: var(--tr-h2); }
+h3 { font-size: var(--fs-h3); line-height: var(--lh-h3); letter-spacing: var(--tr-h3); }
+h4 { font-size: var(--fs-h4); line-height: var(--lh-h4); }
+
+p {
+  margin: 0 0 var(--sp-4);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--fg-2);
+  text-wrap: pretty;
+}
+
+small, .caption {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--fg-3);
+}
+
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  line-height: var(--lh-mono);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border-hair);
+  margin: var(--sp-6) 0;
+}
+
+a {
+  color: var(--fg-accent);
+  text-decoration: none;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+a:hover { text-decoration: underline; }
+a:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-1);
+}
+
+/* Utility: overline label (used for section eyebrows) */
+.overline {
+  font-size: var(--fs-overline);
+  line-height: var(--lh-overline);
+  letter-spacing: var(--tr-overline);
+  text-transform: uppercase;
+  color: var(--fg-3);
+  font-weight: var(--fw-medium);
+}
+
+.display {
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: var(--tr-display);
+  font-weight: var(--fw-semibold);
+  color: var(--fg-1);
+}
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Tables — institutional default (thin dividers, no card) */
+table.qn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-body-sm);
+  color: var(--fg-2);
+}
+table.qn-table thead th {
+  text-align: left;
+  font-weight: var(--fw-medium);
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border-line);
+  background: transparent;
+}
+table.qn-table tbody td {
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--border-hair);
+  vertical-align: top;
+}
+table.qn-table tbody tr:hover td { background: var(--bg-subtle); }
